@@ -1,3 +1,93 @@
-﻿
+﻿<div class="jumbotron">
+    <h1>Walk SD</h1>
+    start
+    end
+    <div class="container" ng-controller="walksdController as walksdCtrl">
+        <form name="walksdForm">
+            <div class="form-group" ng-class="{'has-error' : walksd.start.$invalid && !walksdForm.start.$pristine }">
+                <label for="start">Start</label>
+                <input type="text" class="form-control" name="Start" placeholder="Start" ng-model="walksdCtrl.walksdItem.start" required>
+                <p ng-show="walksdForm.title.$invalid && !walksdForm.title.$pristine" class="help-block">Start location is required</p>
+            </div>
 
- 
+            <!-- Description-->
+            <div class="form-group" ng-class="{'has-error' : walksdForm.title.$invalid && !walksdForm.end.$pristine }">
+                <label for="End">End</label>
+                <input type="text" class="form-control" name="End" placeholder="End" ng-model="walksdCtrl.walksdItem.end" required>
+                <p ng-show="walksdForm.end.$invalid && !walksdForm.title.$pristine" class="help-block">End location is require</p>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section scripts {
+    <script src="~/Scripts/service-factory/sabio.services.factory.walkSD.js"></script>
+    <script type="text/javascript">
+
+        (function () {
+            "use strict";
+
+            angular.module('myApp')
+                .controller('walksdController', WalksdController)
+
+            WalksdController.$inject = ['$scope', "$walkSDService"];
+
+            function WalksdController(
+                $scope
+                , $walkSDservice) {
+
+                var vm = this;
+                vm.item = null;
+
+                vm.$walkSDservice = $walkSDservice;
+                vm.$scope = $scope;
+
+                vm.walksdItem = {};
+
+                //  bindable members (functions) always go up top while the "meat" of the functions go below: https://github.com/johnpapa/angular-styleguide#style-y033
+
+                // GET BINDS
+                vm.getForm = _getForm;
+                vm.getPEDEVTbyAsset = _getPEDEVTbyAsset;
+
+                // SUBMIT BINDS
+                vm.submit = _submit;
+
+
+                //this is like the sabio.startUp function
+                render();
+
+                function render() {
+                    vm.getPEDEVTbyAsset();
+                    console.log("Render Finished")
+                }
+
+                function _getForm(data) {
+                    vm.notify(function () {
+                        vm.walksdItem = data.item;
+                    });
+                    console.log(vm.walksdItem);
+                }
+
+                function _submit(isValid) {
+                }
+
+                // Get Pedestrian Information by Asset
+                function _getPEDEVTbyAsset(PedAsset, Start, End) {
+                    PedAsset = "CAM-HYP1071-F";
+                    Start = "1497908264000";
+                    End = "1497909114000";
+                    $walkSDservice.getPEDEVTbyAsset(PedAsset, Start, End)
+                        .then(GetPEDAssetSuccess)                   
+                }
+
+                function GetPEDAssetSuccess(response) {
+                    console.log("Successfully got Pedestrian Assets");
+                    console.log(response);
+                }
+
+            }
+        })();
+    </script>
+}

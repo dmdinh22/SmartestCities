@@ -1,0 +1,61 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+@section stylesheets{
+    <style>
+            /* Always set the map height explicitly to define the size of the div
+        * element that contains the map. */
+            #map {
+                height: 500px;
+                border-radius: 5px;
+                border: 1px solid silver;
+                background-color: grey;
+                margin:50px;
+            }
+            /* Optional: Makes the page fill the window. */
+            html, body {
+                height: 100%;
+                margin-top: 0;
+                padding: 0;
+            }
+
+            #floating-panel {
+                position: relative;
+                top: 88px;
+                left: 40%;
+                z-index: 5;
+                background-color: #fff;
+                padding: 5px;
+                border: 1px solid #999;
+                text-align: center;
+                font-family: 'Roboto','sans-serif';
+                line-height: 30px;
+                padding-left: 10px;
+            }
+    </style>
+}
+
+<div class="container">
+        <div id="map"></div>
+</div>
+
+
+@section scripts{
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&callback=initMap" async defer></script>
+    <script>
+        var map, infoWindow;
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: -34.397, lng: 150.644 },
+                zoom: 11
+            });
+
+        }
+
+
+    </script>
+
+}
