@@ -14,15 +14,14 @@
 
             <div class="form-group" ng-class="{'has-error' : walksdForm.title.$invalid && !walksdForm.end.$pristine }">
                 <label for="End">End</label>
-                <input type="text" id="end" class="form-control" name="end" placeholder="End" ng-model="walksdCtrl.walksdItem.end" required>
+                <div id="locationField">
+                    <input id="autocomplete" class="form-control" placeholder="Enter your destination" onFocus="geolocate()" type="text">
+                </div>
                 <p ng-show="walksdForm.end.$invalid && !walksdForm.title.$pristine" class="help-block">End location is required</p>
             </div>
-            <input type="button" id="submit" value="Create Route"/>
+            <input type="button" id="submit" value="Create Route" />
         </form>
-        <div id="locationField">
-            <input id="autocomplete" placeholder="Enter your address"
-                   onFocus="geolocate()" type="text">
-        </div>
+
     </div>
 </div>
 
@@ -89,6 +88,7 @@
 }
 
 @section scripts {
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&libraries=visualization&callback=initMap" async defer></script>
     <script src="~/Scripts/service-factory/sabio.services.factory.walkSD.js"></script>
     <script type="text/javascript">
 
@@ -181,10 +181,6 @@
         }
     </script>
 
-    <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&libraries=visualization&callback=initMap">
-    </script>
-    @*<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&libraries=visualization"></script>*@
 
     <script>
 
@@ -212,7 +208,7 @@
 
             function calcRoute() {
                 var start = document.getElementById('Start').value;
-                var end = document.getElementById('end').value;
+                var end = document.getElementById('autocomplete').value;
                 var request = {
                     origin: start,
                     destination: end,
@@ -369,6 +365,5 @@
             }
         }
     </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&libraries=places&callback=initAutocomplete"
-        async defer></script>
+
 }
