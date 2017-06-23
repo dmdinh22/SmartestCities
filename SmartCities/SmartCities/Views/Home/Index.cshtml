@@ -35,7 +35,7 @@
     </div>
 </div>
 
-<div class="container" ng-controller="">
+<div class="container">
     <div id="map"></div>
 </div>
 
@@ -96,9 +96,7 @@
 
             WalksdController.$inject = ['$scope', "$walkSDService"];
 
-            function WalksdController(
-                $scope
-                , $walkSDservice) {
+            function WalksdController($scope, $walkSDservice) {
 
                 var vm = this;
                 vm.item = null;
@@ -118,7 +116,6 @@
                 vm.submit = _submit;
 
 
-                //this is like the sabio.startUp function
                 render();
 
                 function render() {
