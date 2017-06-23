@@ -1,11 +1,12 @@
 ﻿<div class="jumbotron">
 <h1>Walk SD</h1>
-
-    <div class="container">
+    start
+    end
+    <div class="container" ng-controller="walksdController as walksdCtrl">
         <form name="walksdForm">
-            <div class="form-group" ng-class="{'has-error' : walksd.start.$invalid && !privacyPolicyForm.start.$pristine }">
+            <div class="form-group" ng-class="{'has-error' : walksd.start.$invalid && !walksdForm.start.$pristine }">
                 <label for="start">Start</label>
-                <input type="text" class="form-control" name="Start" placeholder="Start" ng-model="walksdcrtl.walksdItem.start" required>
+                <input type="text" class="form-control" name="Start" placeholder="Start" ng-model="walksdCtrl.walksdItem.start" required>
                 <p ng-show="walksdForm.title.$invalid && !walksdForm.title.$pristine" class="help-block">Start location is required</p>
             </div>
 
@@ -16,40 +17,32 @@
                 <p ng-show="walksdForm.end.$invalid && !walksdForm.title.$pristine" class="help-block">End location is require</p>
             </div>
         </form>
-        <button>Send</button>
     </div>
-
 </div>
 
 
 @section scripts {
     <script type="text/javascript">
 
-        sabio.page.ppId = @Model.Item.PpId;
-
-        sabio.page.parentPpId = @Model.Item.ParentPpId;
-
         (function () {
             "use strict";
 
-            sabio.ng.app.module.controller('ppController', PpController);
+            angular.module('myApp', [])
+                .controller('walksdController', WalksdController)
 
-            PpController.$inject = ['$scope', '$baseController', "$ppService"];
+            WalksdController.$inject = ['$scope', "walkSDservice"];
 
-            function PpController(
+            function WalksdController(
                 $scope
-                , $baseController
-                , $ppService) {
+                , $walkSDservice) {
 
-                //  controllerAs with vm syntax: https://github.com/johnpapa/angular-styleguide#style-y032
-                var vm = this;//this points to a new {}
+                var vm = this;
                 vm.item = null;
-                vm.selectedPp = null;
 
-                vm.$ppService = $ppService;
+                vm.$walkSDservice = $walkSDservice;
                 vm.$scope = $scope;
 
-                vm.ppItem = {};
+                vm.walksdItem = {};
 
                 //  bindable members (functions) always go up top while the "meat" of the functions go below: https://github.com/johnpapa/angular-styleguide#style-y033
 
@@ -58,8 +51,6 @@
 
                 // SUBMIT BINDS
                 vm.submit = _submit;
-                vm.ppEditonSuccess = _ppEditonSuccess;
-                vm.ppCreateonSuccess = _ppCreateonSuccess;
 
                 //-- this line to simulate inheritance
                 $baseController.merge(vm, $baseController);
@@ -72,10 +63,9 @@
 
                 function _getForm(data) {
                     vm.notify(function() {
-                        vm.ppItem = data.item;
+                        vm.walksdItem = data.item;
                     });
-                    console.log(vm.ppItem);
-
+                    console.log(vm.walksdItem);
                 }
 
                 function _submit(isValid) {
@@ -85,7 +75,3 @@
         })();
 </script>
 }
-    
-    
-    
-    }
