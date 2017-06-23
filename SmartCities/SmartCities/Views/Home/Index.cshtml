@@ -1,49 +1,4 @@
-﻿<div class="jumbotron">
-    <h1>Walk SD</h1>
-</div>
-
-<div>
-    <div class="container" ng-controller="walksdController as walksdCtrl">
-        <form name="walksdForm" ng-submit="walksdCtrl.createRoute(walksdForm.$valid)">
-            <div class="form-group" ng-class="{'has-error' : walksd.start.$invalid && !walksdForm.start.$pristine }">
-                <label for="Start">Start</label>
-                <input type="text" id="Start" class="form-control" name="Start" placeholder="Start" ng-model="walksdCtrl.walksdItem.start" required>
-                <p ng-show="walksdForm.title.$invalid && !walksdForm.title.$pristine" class="help-block">Start location is required</p>
-                <button onclick="getLocation()">Get current location</button>
-            </div>
-
-            <div class="form-group" ng-class="{'has-error' : walksdForm.title.$invalid && !walksdForm.end.$pristine }">
-                <label for="End">End</label>
-                <div id="locationField">
-                    <input id="autocomplete" class="form-control" placeholder="Enter your destination" onFocus="geolocate()" type="text">
-                </div>
-                <p ng-show="walksdForm.end.$invalid && !walksdForm.title.$pristine" class="help-block">End location is required</p>
-            </div>
-            <input type="button" id="submit" value="Create Route" />
-        </form>
-
-    </div>
-</div>
-
-<div class="container">
-    <div class="row">
-        <div class="col-md-2"></div>
-        <div class="text-center col-md-8">
-            <button onclick="toggleHeatmap()">Toggle Heatmap</button>
-            <button onclick="changeGradient()">Change gradient</button>
-            <button onclick="changeRadius()">Change radius</button>
-            <button onclick="changeOpacity()">Change opacity</button>
-        </div>
-        <div class="col-md-2"></div>
-    </div>
-</div>
-
-<div class="container">
-    <div id="map"></div>
-</div>
-
-
-@section stylesheets {
+﻿@section stylesheets {
     <style>
         /* Always set the map height explicitly to define the size of the div
         * element that contains the map. */
@@ -75,6 +30,17 @@
             padding-left: 10px;
         }
 
+        .infoDiv {
+            height: 200px;
+            width: 300px;
+            -webkit-user-select: none;
+            background-color: white;
+        }
+
+        #map_canvas img {
+            max-width: none;
+        }
+
         /*#floating-panel {
                 background-color: #fff;
                 border: 1px solid #999;
@@ -85,121 +51,276 @@
                 z-index: 5;
           }*/
     </style>
+
+
+
 }
 
+<div class="jumbotron">
+    <h1 style="text-align:center">Walk SD</h1>
+</div>
+
+
+
+<div class="container" ng-show="">
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="text-center col-md-8">
+            <button onclick="toggleHeatmap()">Toggle Heatmap</button>
+            <button onclick="changeGradient()">Change gradient</button>
+            <button onclick="changeRadius()">Change radius</button>
+            <button onclick="changeOpacity()">Change opacity</button>
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+</div>
+
+<div class="container">
+    <div style="height:600px" id="map_canvas"></div>
+</div>
+
+@*<div class="container" ng-controller="walksdController as walksdCtrl">
+        <form name="walksdForm" ng-submit="walksdCtrl.createRoute(walksdForm)">
+            <div class="form-group">
+                <label for="Start">Start</label>
+                <input type="text" id="Start" class="form-control" name="Start" placeholder="Start" ng-model="walksdCtrl.walksdItem.start">
+            </div>
+            <input type="button" id="submit" value="Lets Go" />
+        </form>
+    </div>*@
+
+
+
+
 @section scripts {
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&libraries=visualization&callback=initMap" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&libraries=visualization"></script>
     <script src="~/Scripts/service-factory/sabio.services.factory.walkSD.js"></script>
+
     <script type="text/javascript">
 
-        (function () {
-            "use strict";
+        $(document).ready(function () {
+            Initialize();
+        });
 
-            angular.module('myApp')
-                .controller('walksdController', WalksdController)
-
-            WalksdController.$inject = ['$scope', "$walkSDService"];
-
-            function WalksdController($scope, $walkSDservice) {
-
-                var vm = this;
-                vm.item = null;
-
-                vm.$walkSDservice = $walkSDservice;
-                vm.$scope = $scope;
-
-                vm.walksdItem = {};
-
-                //  bindable members (functions) always go up top while the "meat" of the functions go below: https://github.com/johnpapa/angular-styleguide#style-y033
-
-                // GET BINDS
-                vm.getForm = _getForm;
-                vm.getPEDEVTbyAsset = _getPEDEVTbyAsset;
-                vm.getAllAssets = _getAllAssets;
-
-                // SUBMIT BINDS
-                vm.submit = _submit;
-
-
-                render();
-
-                function render() {
-                    vm.getAllAssets();
-                }
-
-                function _getForm(data) {
-                    vm.notify(function () {
-                        vm.walksdItem = data.item;
-                    });
-                    console.log(vm.walksdItem);
-                }
-
-                function _submit(isValid) {
-                }
-
-                // Get Pedestrian Information by Asset
-                function _getPEDEVTbyAsset(PedAsset, Start, End) {
-                    PedAsset = "CAM-HYP1071-F";
-                    Start = "1497908264000";
-                    End = "1497908312689";
-                    $walkSDservice.getPEDEVTbyAsset(PedAsset, Start, End)
-                        .then(GetPEDAssetSuccess)
-
-                    function GetPEDAssetSuccess(response) {
-                        console.log("Successfully got Pedestrian Assets");
-                        console.log(response);
-                    }
-                }
-
-                function _getAllAssets() {
-                    $walkSDservice.getAllAssets()
-                        .then(getAllAssetsSuccess);
-                    function getAllAssetsSuccess(response) {
-                        console.log("get all assets success");
-                        console.log(response);
-                    }
-                }
-
-            }
-        })();
-    </script>
-
-    <script>
-        var x = document.getElementById("Start");
-
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition);
-            } else {
-                x.innerHTML = "Geolocation is not supported by this browser.";
-            }
+        var map, infoWindow, pos;
+        function Initialize() {
+            map = new google.maps.Map(document.getElementById('map_canvas'), {
+                center: { lat: 32.712462, lng: -117.156898 },
+                zoom: 20
+            });
+            infoWindow = new google.maps.InfoWindow;
         }
 
-        function showPosition(position) {
-            x.value = (position.coords.latitude + ", " + position.coords.longitude);
-            initMap(position);
+        function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+            infoWindow.setPosition(pos);
+            infoWindow.setContent(browserHasGeolocation ?
+                'Error: The Geolocation service failed.' :
+                'Error: Your browser doesn\'t support geolocation.');
+            infoWindow.open(map);
         }
+
     </script>
 
+    <script type="text/javascript">
 
+
+
+        //(function () {
+        //    "use strict";
+
+        //    angular.module('myApp')
+        //        .controller('walksdController', WalksdController)
+
+        //    WalksdController.$inject = ['$scope', "$walkSDService"];
+
+        //    function WalksdController($scope, $walkSDservice) {
+
+        //        var vm = this;
+        //        vm.item = null;
+
+        //        vm.$walkSDservice = $walkSDservice;
+        //        vm.$scope = $scope;
+
+        //        vm.walksdItem = {};
+
+        //        //  bindable members (functions) always go up top while the "meat" of the functions go below: https://github.com/johnpapa/angular-styleguide#style-y033
+
+        //        // GET BINDS
+        //        vm.getForm = _getForm;
+        //        vm.getPEDEVTbyAsset = _getPEDEVTbyAsset;
+        //        vm.getAllAssets = _getAllAssets;
+
+        //        // SUBMIT BINDS
+        //        vm.submit = _submit;
+
+
+        //        render();
+
+        //        function render() {
+        //            vm.getAllAssets();
+        //        }
+
+        //        function _getForm(data) {
+        //            vm.notify(function () {
+        //                vm.walksdItem = data.item;
+        //            });
+        //            console.log(vm.walksdItem);
+        //        }
+
+        //        function _submit(isValid) {
+        //        }
+
+        //        // Get Pedestrian Information by Asset
+        //        function _getPEDEVTbyAsset(PedAsset, Start, End) {
+        //            PedAsset = "CAM-HYP1071-F";
+        //            Start = "1497908264000";
+        //            End = "1497908312689";
+        //            $walkSDservice.getPEDEVTbyAsset(PedAsset, Start, End)
+        //                .then(GetPEDAssetSuccess)
+
+        //            function GetPEDAssetSuccess(response) {
+        //                console.log("Successfully got Pedestrian Assets");
+        //                console.log(response);
+        //            }
+        //        }
+
+        //        function _getAllAssets() {
+        //            $walkSDservice.getAllAssets()
+        //                .then(getAllAssetsSuccess);
+        //            function getAllAssetsSuccess(response) {
+        //                console.log("get all assets success");
+        //                console.log(response);
+        //                angular.forEach(response.data.content, function (obj) {
+        //                    var payload = {
+        //                        long: "",
+        //                        lat:""
+        //                    }
+        //                    var split = obj.coordinates.split(":");
+        //                    payload.lat = split[0];
+        //                    payload.long = split[1];
+
+        //                    nodeCords.push(payload);
+        //                })
+        //            }
+        //        }
+
+        //    }
+        //})();
+    </script>
     <script>
 
-        var map, heatmap;
-        var map, infoWindow;
+        var map, heatmap, infoWindow, pointArray;
+        var nodeCords = [];
 
+        $(document).ready(function () {
+            getPoints()
+        });
+
+        var pointArray = new google.maps.MVCArray(pointData);
+
+        var pointData = [
+          //new google.maps.LatLng(32.711573, -117.156198),
+          //new google.maps.LatLng(32.711664, -117.156404),
+          //new google.maps.LatLng(32.71372, -117.156634),
+          //new google.maps.LatLng(32.715611, -117.157534),
+          //new google.maps.LatLng(32.712513, -117.158008),
+          //new google.maps.LatLng(32.713549, -117.159114),
+          //new google.maps.LatLng(32.71372, -117.157547),
+          //new google.maps.LatLng(32.712507, -117.157666),
+          //new google.maps.LatLng(32.713552, -117.15846),
+          //new google.maps.LatLng(32.711421, -117.157264),
+          //new google.maps.LatLng(32.713715, -117.157158),
+          //new google.maps.LatLng(32.711617, -117.158441),
+          //new google.maps.LatLng(32.713521, -117.159346),
+          //new google.maps.LatLng(32.713534, -117.157517),
+          //new google.maps.LatLng(32.712468, -117.157511),
+          //new google.maps.LatLng(32.71355, -117.158815),
+          //new google.maps.LatLng(32.711628, -117.156618),
+          //new google.maps.LatLng(32.71162, -117.156866),
+          //new google.maps.LatLng(32.712695, -117.157313),
+          //new google.maps.LatLng(32.715611, -117.157534),
+          //new google.maps.LatLng(32.712668, -117.157546),
+          //new google.maps.LatLng(32.713735, -117.158238),
+          //new google.maps.LatLng(32.712672, -117.156635),
+          //new google.maps.LatLng(32.71162, -117.157972),
+          //new google.maps.LatLng(32.71355, -117.158815),
+          //new google.maps.LatLng(32.711628, -117.156618),
+          //new google.maps.LatLng(32.714797, -117.157343),
+          //new google.maps.LatLng(32.71372, -117.157547),
+          //new google.maps.LatLng(32.711653, -117.157314),
+          //new google.maps.LatLng(32.714774, -117.158245),
+          //new google.maps.LatLng(32.71162, -117.156866),
+          //new google.maps.LatLng(32.711421, -117.157264),
+          //new google.maps.LatLng(32.712507, -117.157666),
+          //new google.maps.LatLng(32.71459, -117.158204),
+          //new google.maps.LatLng(32.713735, -117.158238),
+          //new google.maps.LatLng(32.714806, -117.156426),
+          //new google.maps.LatLng(32.71459, -117.158204),
+          //new google.maps.LatLng(32.713763, -117.156411),
+          //new google.maps.LatLng(32.713559, -117.15765),
+          //new google.maps.LatLng(32.713521, -117.159346),
+          //new google.maps.LatLng(32.711615, -117.157765),
+          //new google.maps.LatLng(32.71162, -117.157972),
+          //new google.maps.LatLng(32.712513, -117.157283),
+          //new google.maps.LatLng(32.711618, -117.157534),
+          //new google.maps.LatLng(32.71372, -117.156876),
+          //new google.maps.LatLng(32.712502, -117.158897),
+          //new google.maps.LatLng(32.711617, -117.158441),
+          //new google.maps.LatLng(32.71372, -117.156876),
+          //new google.maps.LatLng(32.711426, -117.156802),
+          //new google.maps.LatLng(32.713559, -117.15765),
+          //new google.maps.LatLng(32.713521, -117.158423),
+          //new google.maps.LatLng(32.712668, -117.157546),
+          //new google.maps.LatLng(32.713562, -117.156732),
+          //new google.maps.LatLng(32.711653, -117.157314),
+          //new google.maps.LatLng(32.711424, -117.157012),
+          //new google.maps.LatLng(32.712471, -117.158423),
+          //new google.maps.LatLng(32.711618, -117.157534),
+          //new google.maps.LatLng(32.711426, -117.156802),
+          //new google.maps.LatLng(32.711615, -117.157765),
+          //new google.maps.LatLng(32.713763, -117.156411),
+          //new google.maps.LatLng(32.713715, -117.157158),
+          //new google.maps.LatLng(32.711424, -117.157012),
+          //new google.maps.LatLng(32.712513, -117.158008),
+          //new google.maps.LatLng(32.713552, -117.15846),
+          //new google.maps.LatLng(32.712502, -117.158897),
+          //new google.maps.LatLng(32.714759, -117.157563),
+          //new google.maps.LatLng(32.714797, -117.157343),
+          //new google.maps.LatLng(32.711424, -117.157012),
+          //new google.maps.LatLng(32.713715, -117.157158),
+          //new google.maps.LatLng(32.712502, -117.158897),
+          //new google.maps.LatLng(32.714806, -117.156426),
+          //new google.maps.LatLng(32.712513, -117.158008),
+          //new google.maps.LatLng(32.713562, -117.156732),
+          //new google.maps.LatLng(32.712514, -117.158185),
+          //new google.maps.LatLng(32.71162, -117.157972),
+          //new google.maps.LatLng(32.714774, -117.158245),
+          //new google.maps.LatLng(32.713534, -117.157517),
+          //new google.maps.LatLng(32.712471, -117.158423),
+          //new google.maps.LatLng(32.712513, -117.157283),
+          //new google.maps.LatLng(32.714759, -117.157563),
+          //new google.maps.LatLng(32.712672, -117.156635),
+          //new google.maps.LatLng(32.712695, -117.157313),
+          //new google.maps.LatLng(32.711426, -117.156802),
+          //new google.maps.LatLng(32.712468, -117.157511),
+          //new google.maps.LatLng(32.71372, -117.156876),
+	      //new google.maps.LatLng(32.71162, -117.156866),
+	      //new google.maps.LatLng(32.71372, -117.156634),
+	      //new google.maps.LatLng(32.713562, -117.156732)
+        ];
 
         function initMap(position) {
             if (position) {
                 directionsService = new google.maps.DirectionsService();
                 directionsDisplay = new google.maps.DirectionsRenderer();
-                map = new google.maps.Map(document.getElementById('map'), {
+                map = new google.maps.Map(document.getElementById('map_canvas'), {
                     zoom: 20,
                     center: { lat: position.coords.latitude, lng: position.coords.longitude },
                     mapTypeId: 'roadmap'
                 })
                 directionsDisplay.setMap(map);
             } else {
-                map = new google.maps.Map(document.getElementById('map'), {
+                map = new google.maps.Map(document.getElementById('map_canvas'), {
                     zoom: 16,
                     center: { lat: 32.712462, lng: -117.156898 },
                     mapTypeId: 'roadmap'
@@ -221,10 +342,10 @@
                 });
             }
 
-            document.getElementById("submit").addEventListener("click", calcRoute)
+            //document.getElementById("submit").addEventListener("click", calcRoute)
 
             heatmap = new google.maps.visualization.HeatmapLayer({
-                data: getPoints(),
+                data: setPoints(),
                 map: map
             });
         }
@@ -261,12 +382,37 @@
             heatmap.set('opacity', heatmap.get('opacity') ? null : 0.2);
         }
 
+
         // Heatmap data: 500 Points
         function getPoints() {
-            return [
-                new google.maps.LatLng(32.711573, -117.156198),
-            ];
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "https://ic-metadata-service.run.aws-usw02-pr.ice.predix.io/v2/metadata/assets/search?bbox=32.715675%3A-117.161230%2C32.708498%3A-117.151681&page=0&size=200&q=eventTypes%3APKIN",
+                "method": "GET",
+                "headers": {
+                    "authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiIzN2YwOWM1ODBmMDQ0YWJkODFhNDgwNWIxNjFkOGFlMyIsInN1YiI6ImhhY2thdGhvbiIsInNjb3BlIjpbInVhYS5yZXNvdXJjZSIsImllLWN1cnJlbnQuU0RTSU0tSUUtUFVCTElDLVNBRkVUWS5JRS1QVUJMSUMtU0FGRVRZLkxJTUlURUQuREVWRUxPUCIsImllLWN1cnJlbnQuU0RTSU0tSUUtRU5WSVJPTk1FTlRBTC5JRS1FTlZJUk9OTUVOVEFMLkxJTUlURUQuREVWRUxPUCIsImllLWN1cnJlbnQuU0RTSU0tSUUtVFJBRkZJQy5JRS1UUkFGRklDLkxJTUlURUQuREVWRUxPUCIsImllLWN1cnJlbnQuU0RTSU0tSUUtUEFSS0lORy5JRS1QQVJLSU5HLkxJTUlURUQuREVWRUxPUCIsImllLWN1cnJlbnQuU0RTSU0tSUUtUEVERVNUUklBTi5JRS1QRURFU1RSSUFOLkxJTUlURUQuREVWRUxPUCJdLCJjbGllbnRfaWQiOiJoYWNrYXRob24iLCJjaWQiOiJoYWNrYXRob24iLCJhenAiOiJoYWNrYXRob24iLCJncmFudF90eXBlIjoiY2xpZW50X2NyZWRlbnRpYWxzIiwicmV2X3NpZyI6IjlmMWYyYzRkIiwiaWF0IjoxNDk4MTgyODkxLCJleHAiOjE0OTg3ODc2OTEsImlzcyI6Imh0dHBzOi8vODkwNDA3ZDctZTYxNy00ZDcwLTk4NWYtMDE3OTJkNjkzMzg3LnByZWRpeC11YWEucnVuLmF3cy11c3cwMi1wci5pY2UucHJlZGl4LmlvL29hdXRoL3Rva2VuIiwiemlkIjoiODkwNDA3ZDctZTYxNy00ZDcwLTk4NWYtMDE3OTJkNjkzMzg3IiwiYXVkIjpbImllLWN1cnJlbnQuU0RTSU0tSUUtVFJBRkZJQy5JRS1UUkFGRklDLkxJTUlURUQiLCJpZS1jdXJyZW50LlNEU0lNLUlFLVBBUktJTkcuSUUtUEFSS0lORy5MSU1JVEVEIiwiaWUtY3VycmVudC5TRFNJTS1JRS1QVUJMSUMtU0FGRVRZLklFLVBVQkxJQy1TQUZFVFkuTElNSVRFRCIsInVhYSIsImhhY2thdGhvbiIsImllLWN1cnJlbnQuU0RTSU0tSUUtRU5WSVJPTk1FTlRBTC5JRS1FTlZJUk9OTUVOVEFMLkxJTUlURUQiLCJpZS1jdXJyZW50LlNEU0lNLUlFLVBFREVTVFJJQU4uSUUtUEVERVNUUklBTi5MSU1JVEVEIl19.rrrGVxM2wKReM6rCjC7JMfWEXnmgkZrQNJDGk5uxG3JArtMvgputL1HLvXTqR4e0QFanZUxvgpOrrk6YjFf9l-qQO8ZkRIEVNqdrioPcLvaDYhEqVPAwqDFYZ_ak9eXqsTnq0hFgfsfRJEO3JvcNxZCdTI0rJxw3nnvjkfiY06afBzlgKqZd5Ds5A2bWQo2um_jFei82OKMDeocga29I8gJnpf6ZKovVJsWS8WUM3BhWk5jA708V0qgVANg8Wfc3phC8IcITR4fLKYV1nHOqCsssAtT3cZhH0aMr6vMxy3R0SYbwWIkcO7jKk4Wq2Mp0ZiRcd2bbTVdq0v8WeLtwnQ",
+                    "predix-zone-id": "SDSIM-IE-PARKING"
+                }
+            }
+
+            $.ajax(settings).done(function (response) {
+                for (var i = 0; i < response.content.length; i++) {
+                    var coords = response.content[i].coordinates;
+                    var arrayCoords = coords.split(":");
+                    var lat = arrayCoords[0];
+                    var long = arrayCoords[1];
+                    pointData.push(new google.maps.LatLng(lat, long));
+                }
+                initMap();
+
+            });
         }
+
+        function setPoints() {
+            return pointData;
+        }
+
     </script>
 
 
