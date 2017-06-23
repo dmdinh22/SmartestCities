@@ -22,17 +22,79 @@
     </div>
 </div>
 
+<div class="container">
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="text-center col-md-8">
+            <button onclick="toggleHeatmap()">Toggle Heatmap</button>
+            <button onclick="changeGradient()">Change gradient</button>
+            <button onclick="changeRadius()">Change radius</button>
+            <button onclick="changeOpacity()">Change opacity</button>
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+</div>
+
+<div class="container">
+    <div id="map"></div>
+</div>
+
+
+@section stylesheets {
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+    * element that contains the map. */
+        #map {
+            height: 500px;
+            border-radius: 5px;
+            border: 1px solid silver;
+            background-color: grey;
+            margin: 50px;
+        }
+        /* Optional: Makes the page fill the window. */
+        html, body {
+            height: 100%;
+            margin-top: 0;
+            padding: 0;
+        }
+
+        #floating-panel {
+            position: relative;
+            top: 88px;
+            left: 40%;
+            z-index: 5;
+            background-color: #fff;
+            padding: 5px;
+            border: 1px solid #999;
+            text-align: center;
+            font-family: 'Roboto','sans-serif';
+            line-height: 30px;
+            padding-left: 10px;
+        }
+
+        /*#floating-panel {
+            background-color: #fff;
+            border: 1px solid #999;
+            left: 25%;
+            padding: 5px;
+            position: absolute;
+            top: 10px;
+            z-index: 5;
+      }*/
+    </style>
+}
 
 @section scripts {
+    <script src="~/Scripts/service-factory/sabio.services.factory.walkSD.js"></script>
     <script type="text/javascript">
 
         (function () {
             "use strict";
 
-            angular.module('myApp', [])
+            angular.module('myApp')
                 .controller('walksdController', WalksdController)
 
-            WalksdController.$inject = ['$scope', "walkSDservice"];
+            WalksdController.$inject = ['$scope', "$walkSDService"];
 
             function WalksdController(
                 $scope
@@ -50,27 +112,42 @@
 
                 // GET BINDS
                 vm.getForm = _getForm;
+                vm.getPEDEVTbyAsset = _getPEDEVTbyAsset;
 
                 // SUBMIT BINDS
                 vm.submit = _submit;
 
-                //-- this line to simulate inheritance
-                $baseController.merge(vm, $baseController);
 
                 //this is like the sabio.startUp function
                 render();
 
                 function render() {
+                    vm.getPEDEVTbyAsset();
+                    console.log("Render Finished")
                 }
 
                 function _getForm(data) {
-                    vm.notify(function() {
+                    vm.notify(function () {
                         vm.walksdItem = data.item;
                     });
                     console.log(vm.walksdItem);
                 }
 
                 function _submit(isValid) {
+                }
+
+                // Get Pedestrian Information by Asset
+                function _getPEDEVTbyAsset(PedAsset, Start, End) {
+                    PedAsset = "CAM-HYP1071-F";
+                    Start = "1497908264000";
+                    End = "1497909114000";
+                    $walkSDservice.getPEDEVTbyAsset(PedAsset, Start, End)
+                        .then(GetPEDAssetSuccess)                   
+                }
+
+                function GetPEDAssetSuccess(response) {
+                    console.log("Successfully got Pedestrian Assets");
+                    console.log(response);
                 }
 
             }
@@ -90,6 +167,82 @@
 
     function showPosition(position) {
         x.value = (position.coords.latitude + ", " + position.coords.longitude);
+        initMap(position);
     }
 </script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&libraries=visualization"></script>
+
+<script>
+
+        var map, heatmap;
+        var map, infoWindow;
+        
+        
+        function initMap(position) {
+            if (position) {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 20,
+                    center: { lat: position.coords.latitude, lng: position.coords.longitude },
+                    mapTypeId: 'satellite'
+                })
+            } else {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 20,
+                    center: { lat: 32.712462, lng: -117.156898 },
+                    mapTypeId: 'satellite'
+                })
+            }
+
+        heatmap = new google.maps.visualization.HeatmapLayer({
+          data: getPoints(),
+          map: map
+        });
+      }
+
+      function toggleHeatmap() {
+        heatmap.setMap(heatmap.getMap() ? null : map);
+      }
+
+      function changeGradient() {
+        var gradient = [
+          'rgba(0, 255, 255, 0)',
+          'rgba(0, 255, 255, 1)',
+          'rgba(0, 191, 255, 1)',
+          'rgba(0, 127, 255, 1)',
+          'rgba(0, 63, 255, 1)',
+          'rgba(0, 0, 255, 1)',
+          'rgba(0, 0, 223, 1)',
+          'rgba(0, 0, 191, 1)',
+          'rgba(0, 0, 159, 1)',
+          'rgba(0, 0, 127, 1)',
+          'rgba(63, 0, 91, 1)',
+          'rgba(127, 0, 63, 1)',
+          'rgba(191, 0, 31, 1)',
+          'rgba(255, 0, 0, 1)'
+        ]
+        heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
+      }
+
+      function changeRadius() {
+        heatmap.set('radius', heatmap.get('radius') ? null : 20);
+      }
+
+      function changeOpacity() {
+        heatmap.set('opacity', heatmap.get('opacity') ? null : 0.2);
+      }
+
+      // Heatmap data: 500 Points
+      function getPoints() {
+          return [
+              new google.maps.LatLng(32.711573, -117.156198),
+        ];
+      }
+</script>
+
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&libraries=visualization&callback=initMap">
+</script>
+
 }
