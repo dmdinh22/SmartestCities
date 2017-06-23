@@ -37,7 +37,7 @@
     </style>
 }
 
-<div class="container">
+<div class="container" ng-controller="mapController as MCtrl">
     <div id="map"></div>
     <p>start</p>
     <input type="text" id="start" value="Huntington Beach" />
@@ -49,9 +49,31 @@
 
 
 @section scripts{
-
+    <script src="~/Scripts/service-factory/sabio.services.factory.walkSD.js"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&callback=initMap" async defer></script>
     <script type="text/javascript">
+
+        (function () {
+            "use strict";
+
+            angular.module("myApp").controller("mapController", MapController);
+
+            function MapController($scope, $walkSDService) {
+                var vm = this;
+                vm.$scope = $scope;
+                vm.$walkSDService = $walkSDService;
+
+
+
+            }
+
+
+
+
+
+        })();
+
+
 
         function initMap() {
             var directionsService = new google.maps.DirectionsService();
@@ -69,12 +91,14 @@
                 var request = {
                     origin: start,
                     destination: end,
-                    travelMode: 'DRIVING'
+                    travelMode: 'WALKING'
                 };
                 directionsService.route(request, function (result, status) {
                     if (status == 'OK') {
                         directionsDisplay.setDirections(result);
-                        console.log(result)
+                        console.table(result)
+                        console.table(result.routes.overview_path)
+                        console.table(result.geocoded_waypoints)
                     }
                 });
             }
