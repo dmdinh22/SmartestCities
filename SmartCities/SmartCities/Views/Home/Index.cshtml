@@ -1,13 +1,91 @@
-﻿@{
-    ViewBag.Title = "Home Page";
-}
-
-<div class="jumbotron">
-<h1>App Name</h1>
+﻿<div class="jumbotron">
+<h1>Walk SD</h1>
 
     <div class="container">
-        <form>
+        <form name="walksdForm">
+            <div class="form-group" ng-class="{'has-error' : walksd.start.$invalid && !privacyPolicyForm.start.$pristine }">
+                <label for="start">Start</label>
+                <input type="text" class="form-control" name="Start" placeholder="Start" ng-model="walksdcrtl.walksdItem.start" required>
+                <p ng-show="walksdForm.title.$invalid && !walksdForm.title.$pristine" class="help-block">Start location is required</p>
+            </div>
 
+            <!-- Description-->
+            <div class="form-group" ng-class="{'has-error' : walksdForm.title.$invalid && !walksdForm.end.$pristine }">
+                <label for="End">End</label>
+                <input type="text" class="form-control" name="End" placeholder="End" ng-model="walksdCtrl.walksdItem.end" required>
+                <p ng-show="walksdForm.end.$invalid && !walksdForm.title.$pristine" class="help-block">End location is require</p>
+            </div>
         </form>
+        <button>Send</button>
     </div>
+
 </div>
+
+
+@section scripts {
+    <script type="text/javascript">
+
+        sabio.page.ppId = @Model.Item.PpId;
+
+        sabio.page.parentPpId = @Model.Item.ParentPpId;
+
+        (function () {
+            "use strict";
+
+            sabio.ng.app.module.controller('ppController', PpController);
+
+            PpController.$inject = ['$scope', '$baseController', "$ppService"];
+
+            function PpController(
+                $scope
+                , $baseController
+                , $ppService) {
+
+                //  controllerAs with vm syntax: https://github.com/johnpapa/angular-styleguide#style-y032
+                var vm = this;//this points to a new {}
+                vm.item = null;
+                vm.selectedPp = null;
+
+                vm.$ppService = $ppService;
+                vm.$scope = $scope;
+
+                vm.ppItem = {};
+
+                //  bindable members (functions) always go up top while the "meat" of the functions go below: https://github.com/johnpapa/angular-styleguide#style-y033
+
+                // GET BINDS
+                vm.getForm = _getForm;
+
+                // SUBMIT BINDS
+                vm.submit = _submit;
+                vm.ppEditonSuccess = _ppEditonSuccess;
+                vm.ppCreateonSuccess = _ppCreateonSuccess;
+
+                //-- this line to simulate inheritance
+                $baseController.merge(vm, $baseController);
+
+                //this is like the sabio.startUp function
+                render();
+
+                function render() {
+                }
+
+                function _getForm(data) {
+                    vm.notify(function() {
+                        vm.ppItem = data.item;
+                    });
+                    console.log(vm.ppItem);
+
+                }
+
+                function _submit(isValid) {
+                }
+
+            }
+        })();
+</script>
+}
+    
+    
+    
+    }
