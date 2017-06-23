@@ -63,6 +63,18 @@
                 vm.$scope = $scope;
                 vm.$walkSDService = $walkSDService;
 
+                render()
+
+                function render() {
+                    $walkSDService.getPEDEVTbyLocation()
+                    .then(function (data) {
+                        console.log(data);
+
+                    })
+
+
+                }
+
 
 
             }
