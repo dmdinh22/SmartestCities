@@ -35,44 +35,44 @@
     </div>
 </div>
 
-<div class="container" ng-controller="">
+<div class="container">
     <div id="map"></div>
 </div>
 
 
 @section stylesheets {
     <style>
-            /* Always set the map height explicitly to define the size of the div
+        /* Always set the map height explicitly to define the size of the div
         * element that contains the map. */
-            #map {
-                height: 500px;
-                border-radius: 5px;
-                border: 1px solid silver;
-                background-color: grey;
-                margin: 50px;
-            }
-            /* Optional: Makes the page fill the window. */
-            html, body {
-                height: 100%;
-                margin-top: 0;
-                padding: 0;
-            }
+        #map {
+            height: 500px;
+            border-radius: 5px;
+            border: 1px solid silver;
+            background-color: grey;
+            margin: 50px;
+        }
+        /* Optional: Makes the page fill the window. */
+        html, body {
+            height: 100%;
+            margin-top: 0;
+            padding: 0;
+        }
 
-            #floating-panel {
-                position: relative;
-                top: 88px;
-                left: 40%;
-                z-index: 5;
-                background-color: #fff;
-                padding: 5px;
-                border: 1px solid #999;
-                text-align: center;
-                font-family: 'Roboto','sans-serif';
-                line-height: 30px;
-                padding-left: 10px;
-            }
+        #floating-panel {
+            position: relative;
+            top: 88px;
+            left: 40%;
+            z-index: 5;
+            background-color: #fff;
+            padding: 5px;
+            border: 1px solid #999;
+            text-align: center;
+            font-family: 'Roboto','sans-serif';
+            line-height: 30px;
+            padding-left: 10px;
+        }
 
-            /*#floating-panel {
+        /*#floating-panel {
                 background-color: #fff;
                 border: 1px solid #999;
                 left: 25%;
@@ -173,8 +173,10 @@
         }
     </script>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&callback=initMap" async defer></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&libraries=visualization"></script>
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&libraries=visualization&callback=initMap">
+    </script>
+    @*<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&libraries=visualization"></script>*@
 
     <script>
 
@@ -243,40 +245,38 @@
         }
     </script>
 
-    <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&libraries=visualization&callback=initMap">
+
+
+    <script>
+
+        (function () {
+            "use strict";
+
+            angular.module("myApp")
+                .controller("heatController", HeatController);
+
+            HeatController.$inject = ['$scope', '$walkSDService']
+
+            function HeatController($scope, $walkSDService) {
+                var vm = this;
+                vm.$scope = $scope;
+                vm.$walkSDService = $walkSDService;
+
+                vm.getHeatBBox = _getHeatBBox;
+
+                render();
+
+                function render() {
+                    vm.getHeatBBox();
+                }
+
+                function _getHeatBBox() {
+                    //$walkSDService.getPEDEVTbybBox(bbox, "32.715675:-117.161230", "32.708498:-117.151681")
+                    $walkSDService.getPEDEVTbybBox(bbox, '33.109978:-117.327287', '32.539897:-116.835649');
+                }
+            }
+        })();
+
     </script>
-
-<script>
-
-    (function () {
-        "use strict";
-
-        angular.module("myApp")
-            .controller("heatController", HeatController);
-
-        HeatController.$inject = ['$scope', '$walkSDService']
-
-        function HeatController($scope, $walkSDService) {
-            var vm = this;
-            vm.$scope = $scope;
-            vm.$walkSDService = $walkSDService;
-
-            vm.getHeatBBox = _getHeatBBox;
-
-            render();
-
-            function render() {
-                vm.getHeatBBox();
-            }
-
-            function _getHeatBBox() {
-                //$walkSDService.getPEDEVTbybBox(bbox, "32.715675:-117.161230", "32.708498:-117.151681")
-                $walkSDService.getPEDEVTbybBox(bbox, '33.109978:-117.327287', '32.539897:-116.835649');
-            }
-        }
-    })();
-
-</script>
 
 }
