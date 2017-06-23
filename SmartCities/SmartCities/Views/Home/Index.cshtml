@@ -35,7 +35,7 @@
     </div>
 </div>
 
-<div class="container">
+<div class="container" ng-controller="">
     <div id="map"></div>
 </div>
 
@@ -244,6 +244,38 @@
 
 <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&libraries=visualization&callback=initMap">
+</script>
+
+<script>
+
+    (function () {
+        "use strict";
+
+        angular.module("myApp")
+            .controller("heatController", HeatController);
+
+        HeatController.$inject = ['$scope', '$walkSDService']
+
+        function HeatController($scope, $walkSDService) {
+            var vm = this;
+            vm.$scope = $scope;
+            vm.$walkSDService = $walkSDService;
+
+            vm.getHeatBBox = _getHeatBBox;
+
+            render();
+
+            function render() {
+                vm.getHeatBBox();
+            }
+
+            function _getHeatBBox() {
+                //$walkSDService.getPEDEVTbybBox(bbox, "32.715675:-117.161230", "32.708498:-117.151681")
+                $walkSDService.getPEDEVTbybBox(bbox, '33.109978:-117.327287', '32.539897:-116.835649');
+            }
+        }
+    })();
+
 </script>
 
 }
