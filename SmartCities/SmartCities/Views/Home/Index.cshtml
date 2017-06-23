@@ -172,13 +172,13 @@
                 map = new google.maps.Map(document.getElementById('map'), {
                     zoom: 20,
                     center: { lat: position.coords.latitude, lng: position.coords.longitude },
-                    mapTypeId: 'satellite'
+                    mapTypeId: 'roadmap'
                 })
             } else {
                 map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 20,
+                    zoom: 16,
                     center: { lat: 32.712462, lng: -117.156898 },
-                    mapTypeId: 'satellite'
+                    mapTypeId: 'roadmap'
                 })
             }
 
