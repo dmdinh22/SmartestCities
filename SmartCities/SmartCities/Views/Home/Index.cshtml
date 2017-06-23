@@ -1,22 +1,24 @@
 ﻿<div class="jumbotron">
 <h1>Walk SD</h1>
-    start
-    end
+</div>
+
+<div>
     <div class="container" ng-controller="walksdController as walksdCtrl">
         <form name="walksdForm">
             <div class="form-group" ng-class="{'has-error' : walksd.start.$invalid && !walksdForm.start.$pristine }">
-                <label for="start">Start</label>
-                <input type="text" class="form-control" name="Start" placeholder="Start" ng-model="walksdCtrl.walksdItem.start" required>
+                <label for="Start">Start</label>
+                <input type="text" id="Start" class="form-control" name="Start" placeholder="Start" ng-model="walksdCtrl.walksdItem.start" required>
                 <p ng-show="walksdForm.title.$invalid && !walksdForm.title.$pristine" class="help-block">Start location is required</p>
+                <button onclick="getLocation()">Get current location</button>
             </div>
 
-            <!-- Description-->
             <div class="form-group" ng-class="{'has-error' : walksdForm.title.$invalid && !walksdForm.end.$pristine }">
                 <label for="End">End</label>
                 <input type="text" class="form-control" name="End" placeholder="End" ng-model="walksdCtrl.walksdItem.end" required>
-                <p ng-show="walksdForm.end.$invalid && !walksdForm.title.$pristine" class="help-block">End location is require</p>
+                <p ng-show="walksdForm.end.$invalid && !walksdForm.title.$pristine" class="help-block">End location is required</p>
             </div>
         </form>
+
     </div>
 </div>
 
@@ -69,9 +71,26 @@
                 }
 
                 function _submit(isValid) {
+
                 }
 
             }
         })();
+</script>
+
+<script>
+    var x = document.getElementById("Start");
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            x.innerHTML = "Geolocation is not supported by this browser.";
+        }
+    }
+
+    function showPosition(position) {
+        x.value = (position.coords.latitude + ", " + position.coords.longitude);
+    }
 </script>
 }
