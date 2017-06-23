@@ -85,17 +85,16 @@
 }
 
 @section scripts {
-
-
+    <script src="~/Scripts/service-factory/sabio.services.factory.walkSD.js"></script>
     <script type="text/javascript">
 
         (function () {
             "use strict";
 
-            angular.module('myApp', [])
+            angular.module('myApp')
                 .controller('walksdController', WalksdController)
 
-            WalksdController.$inject = ['$scope', "walkSDservice"];
+            WalksdController.$inject = ['$scope', "$walkSDService"];
 
             function WalksdController(
                 $scope
@@ -113,21 +112,22 @@
 
                 // GET BINDS
                 vm.getForm = _getForm;
+                vm.getPEDEVTbyAsset = _getPEDEVTbyAsset;
 
                 // SUBMIT BINDS
                 vm.submit = _submit;
 
-                //-- this line to simulate inheritance
-                $baseController.merge(vm, $baseController);
 
                 //this is like the sabio.startUp function
                 render();
 
                 function render() {
+                    vm.getPEDEVTbyAsset();
+                    console.log("Render Finished")
                 }
 
                 function _getForm(data) {
-                    vm.notify(function() {
+                    vm.notify(function () {
                         vm.walksdItem = data.item;
                     });
                     console.log(vm.walksdItem);
@@ -135,6 +135,20 @@
 
                 function _submit(isValid) {
 
+                }
+
+                // Get Pedestrian Information by Asset
+                function _getPEDEVTbyAsset(PedAsset, Start, End) {
+                    PedAsset = "CAM-HYP1071-F";
+                    Start = "1497908264000";
+                    End = "1497909114000";
+                    $walkSDservice.getPEDEVTbyAsset(PedAsset, Start, End)
+                        .then(GetPEDAssetSuccess)                   
+                }
+
+                function GetPEDAssetSuccess(response) {
+                    console.log("Successfully got Pedestrian Assets");
+                    console.log(response);
                 }
 
             }
