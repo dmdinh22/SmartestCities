@@ -4,7 +4,7 @@
 
 <div>
     <div class="container" ng-controller="walksdController as walksdCtrl">
-        <form name="walksdForm">
+        <form name="walksdForm" ng-submit="walksdCtrl.createRoute(walksdForm.$valid)">
             <div class="form-group" ng-class="{'has-error' : walksd.start.$invalid && !walksdForm.start.$pristine }">
                 <label for="Start">Start</label>
                 <input type="text" id="Start" class="form-control" name="Start" placeholder="Start" ng-model="walksdCtrl.walksdItem.start" required>
@@ -14,9 +14,10 @@
 
             <div class="form-group" ng-class="{'has-error' : walksdForm.title.$invalid && !walksdForm.end.$pristine }">
                 <label for="End">End</label>
-                <input type="text" class="form-control" name="End" placeholder="End" ng-model="walksdCtrl.walksdItem.end" required>
+                <input type="text" id="end" class="form-control" name="end" placeholder="End" ng-model="walksdCtrl.walksdItem.end" required>
                 <p ng-show="walksdForm.end.$invalid && !walksdForm.title.$pristine" class="help-block">End location is required</p>
             </div>
+            <input type="button" id="submit" value="Create Route"/>
         </form>
 
     </div>
@@ -148,7 +149,6 @@
                 }
 
 
-
             }
         })();
     </script>
@@ -183,11 +183,14 @@
 
         function initMap(position) {
             if (position) {
+                directionsService = new google.maps.DirectionsService();
+                directionsDisplay = new google.maps.DirectionsRenderer();
                 map = new google.maps.Map(document.getElementById('map'), {
                     zoom: 20,
                     center: { lat: position.coords.latitude, lng: position.coords.longitude },
                     mapTypeId: 'roadmap'
                 })
+                directionsDisplay.setMap(map);
             } else {
                 map = new google.maps.Map(document.getElementById('map'), {
                     zoom: 16,
@@ -195,6 +198,23 @@
                     mapTypeId: 'roadmap'
                 })
             }
+
+            function calcRoute() {
+                var start = document.getElementById('Start').value;
+                var end = document.getElementById('end').value;
+                var request = {
+                    origin: start,
+                    destination: end,
+                    travelMode: 'WALKING'
+                };
+                directionsService.route(request, function (result, status) {
+                    if (status == 'OK') {
+                        directionsDisplay.setDirections(result);
+                    }
+                });
+            }
+
+            document.getElementById("submit").addEventListener("click", calcRoute)
 
             heatmap = new google.maps.visualization.HeatmapLayer({
                 data: getPoints(),
