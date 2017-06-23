@@ -1,55 +1,113 @@
 ﻿<div class="jumbotron">
 <h1>Walk SD</h1>
+</div>
 
-    <div class="container">
+<div>
+    <div class="container" ng-controller="walksdController as walksdCtrl">
         <form name="walksdForm">
-            <div class="form-group" ng-class="{'has-error' : walksd.start.$invalid && !privacyPolicyForm.start.$pristine }">
-                <label for="start">Start</label>
-                <input type="text" class="form-control" name="Start" placeholder="Start" ng-model="walksdcrtl.walksdItem.start" required>
+            <div class="form-group" ng-class="{'has-error' : walksd.start.$invalid && !walksdForm.start.$pristine }">
+                <label for="Start">Start</label>
+                <input type="text" id="Start" class="form-control" name="Start" placeholder="Start" ng-model="walksdCtrl.walksdItem.start" required>
                 <p ng-show="walksdForm.title.$invalid && !walksdForm.title.$pristine" class="help-block">Start location is required</p>
+                <button onclick="getLocation()">Get current location</button>
             </div>
 
-            <!-- Description-->
             <div class="form-group" ng-class="{'has-error' : walksdForm.title.$invalid && !walksdForm.end.$pristine }">
                 <label for="End">End</label>
                 <input type="text" class="form-control" name="End" placeholder="End" ng-model="walksdCtrl.walksdItem.end" required>
-                <p ng-show="walksdForm.end.$invalid && !walksdForm.title.$pristine" class="help-block">End location is require</p>
+                <p ng-show="walksdForm.end.$invalid && !walksdForm.title.$pristine" class="help-block">End location is required</p>
             </div>
         </form>
-        <button>Send</button>
-    </div>
 
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="text-center col-md-8">
+            <button onclick="toggleHeatmap()">Toggle Heatmap</button>
+            <button onclick="changeGradient()">Change gradient</button>
+            <button onclick="changeRadius()">Change radius</button>
+            <button onclick="changeOpacity()">Change opacity</button>
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+</div>
+
+<div class="container">
+    <div id="map"></div>
 </div>
 
 
+@section stylesheets {
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+    * element that contains the map. */
+        #map {
+            height: 500px;
+            border-radius: 5px;
+            border: 1px solid silver;
+            background-color: grey;
+            margin: 50px;
+        }
+        /* Optional: Makes the page fill the window. */
+        html, body {
+            height: 100%;
+            margin-top: 0;
+            padding: 0;
+        }
+
+        #floating-panel {
+            position: relative;
+            top: 88px;
+            left: 40%;
+            z-index: 5;
+            background-color: #fff;
+            padding: 5px;
+            border: 1px solid #999;
+            text-align: center;
+            font-family: 'Roboto','sans-serif';
+            line-height: 30px;
+            padding-left: 10px;
+        }
+
+        /*#floating-panel {
+            background-color: #fff;
+            border: 1px solid #999;
+            left: 25%;
+            padding: 5px;
+            position: absolute;
+            top: 10px;
+            z-index: 5;
+      }*/
+    </style>
+}
+
 @section scripts {
+
+
     <script type="text/javascript">
-
-        sabio.page.ppId = @Model.Item.PpId;
-
-        sabio.page.parentPpId = @Model.Item.ParentPpId;
 
         (function () {
             "use strict";
 
-            sabio.ng.app.module.controller('ppController', PpController);
+            angular.module('myApp', [])
+                .controller('walksdController', WalksdController)
 
-            PpController.$inject = ['$scope', '$baseController', "$ppService"];
+            WalksdController.$inject = ['$scope', "walkSDservice"];
 
-            function PpController(
+            function WalksdController(
                 $scope
-                , $baseController
-                , $ppService) {
+                , $walkSDservice) {
 
-                //  controllerAs with vm syntax: https://github.com/johnpapa/angular-styleguide#style-y032
-                var vm = this;//this points to a new {}
+                var vm = this;
                 vm.item = null;
-                vm.selectedPp = null;
 
-                vm.$ppService = $ppService;
+                vm.$walkSDservice = $walkSDservice;
                 vm.$scope = $scope;
 
-                vm.ppItem = {};
+                vm.walksdItem = {};
 
                 //  bindable members (functions) always go up top while the "meat" of the functions go below: https://github.com/johnpapa/angular-styleguide#style-y033
 
@@ -58,8 +116,6 @@
 
                 // SUBMIT BINDS
                 vm.submit = _submit;
-                vm.ppEditonSuccess = _ppEditonSuccess;
-                vm.ppCreateonSuccess = _ppCreateonSuccess;
 
                 //-- this line to simulate inheritance
                 $baseController.merge(vm, $baseController);
@@ -72,20 +128,108 @@
 
                 function _getForm(data) {
                     vm.notify(function() {
-                        vm.ppItem = data.item;
+                        vm.walksdItem = data.item;
                     });
-                    console.log(vm.ppItem);
-
+                    console.log(vm.walksdItem);
                 }
 
                 function _submit(isValid) {
+
                 }
 
             }
         })();
 </script>
-}
-    
-    
-    
+
+<script>
+    var x = document.getElementById("Start");
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            x.innerHTML = "Geolocation is not supported by this browser.";
+        }
     }
+
+    function showPosition(position) {
+        x.value = (position.coords.latitude + ", " + position.coords.longitude);
+        initMap(position);
+    }
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&libraries=visualization"></script>
+
+<script>
+
+        var map, heatmap;
+        var map, infoWindow;
+        
+        
+        function initMap(position) {
+            if (position) {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 20,
+                    center: { lat: position.coords.latitude, lng: position.coords.longitude },
+                    mapTypeId: 'satellite'
+                })
+            } else {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 20,
+                    center: { lat: 32.712462, lng: -117.156898 },
+                    mapTypeId: 'satellite'
+                })
+            }
+
+        heatmap = new google.maps.visualization.HeatmapLayer({
+          data: getPoints(),
+          map: map
+        });
+      }
+
+      function toggleHeatmap() {
+        heatmap.setMap(heatmap.getMap() ? null : map);
+      }
+
+      function changeGradient() {
+        var gradient = [
+          'rgba(0, 255, 255, 0)',
+          'rgba(0, 255, 255, 1)',
+          'rgba(0, 191, 255, 1)',
+          'rgba(0, 127, 255, 1)',
+          'rgba(0, 63, 255, 1)',
+          'rgba(0, 0, 255, 1)',
+          'rgba(0, 0, 223, 1)',
+          'rgba(0, 0, 191, 1)',
+          'rgba(0, 0, 159, 1)',
+          'rgba(0, 0, 127, 1)',
+          'rgba(63, 0, 91, 1)',
+          'rgba(127, 0, 63, 1)',
+          'rgba(191, 0, 31, 1)',
+          'rgba(255, 0, 0, 1)'
+        ]
+        heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
+      }
+
+      function changeRadius() {
+        heatmap.set('radius', heatmap.get('radius') ? null : 20);
+      }
+
+      function changeOpacity() {
+        heatmap.set('opacity', heatmap.get('opacity') ? null : 0.2);
+      }
+
+      // Heatmap data: 500 Points
+      function getPoints() {
+          return [
+              new google.maps.LatLng(32.711573, -117.156198),
+        ];
+      }
+</script>
+
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB75i41DrdobNtl1D-moulR4fXxQZmrKYg&libraries=visualization&callback=initMap">
+</script>
+
+}
